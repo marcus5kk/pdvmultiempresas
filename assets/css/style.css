@@ -1,0 +1,444 @@
+/* Sistema PDV - Estilos principais */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Login page */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    color: var(--dark-color);
+    margin-bottom: 10px;
+}
+
+.login-header p {
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(90deg, var(--primary-color), #0056b3);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: white !important;
+}
+
+/* Sidebar */
+.sidebar {
+    background: white;
+    min-height: calc(100vh - 76px);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    padding: 20px 0;
+}
+
+.sidebar .nav-link {
+    color: var(--dark-color);
+    padding: 12px 20px;
+    margin: 2px 10px;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--light-color);
+    color: var(--primary-color);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+/* Main content */
+.main-content {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 76px);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 20px;
+}
+
+.card-header h5 {
+    margin: 0;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), #0056b3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #0056b3, var(--primary-color));
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--success-color), #1e7e34);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, var(--danger-color), #c82333);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, var(--warning-color), #e0a800);
+    border: none;
+    color: var(--dark-color);
+}
+
+/* Forms */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Tables */
+.table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.table thead th {
+    background-color: var(--light-color);
+    border: none;
+    font-weight: 600;
+    color: var(--dark-color);
+    padding: 15px;
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 15px 20px;
+}
+
+.alert-success {
+    background: linear-gradient(45deg, #d4edda, #c3e6cb);
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+}
+
+.alert-warning {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+/* PDV specific styles */
+.pdv-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.product-search {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: var(--light-color);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cart-summary {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px;
+}
+
+.total-display {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--success-color);
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(45deg, #d4edda, #c3e6cb);
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+/* Dashboard stats */
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card .icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.stat-card.sales .icon {
+    color: var(--success-color);
+}
+
+.stat-card.products .icon {
+    color: var(--primary-color);
+}
+
+.stat-card.warning .icon {
+    color: var(--warning-color);
+}
+
+.stat-card.info .icon {
+    color: var(--info-color);
+}
+
+.stat-card h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    color: var(--dark-color);
+}
+
+.stat-card p {
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+/* Loading spinner */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+    
+    .pdv-container {
+        padding: 0 10px;
+    }
+    
+    .cart-summary {
+        position: static;
+        margin-top: 20px;
+    }
+    
+    .total-display {
+        font-size: 1.5rem;
+        padding: 15px;
+    }
+    
+    .stat-card {
+        margin-bottom: 20px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, .sidebar, .btn, .no-print {
+        display: none !important;
+    }
+    
+    .main-content {
+        padding: 0;
+        background: white;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Utilities */
+.text-gradient {
+    background: linear-gradient(45deg, var(--primary-color), #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.border-custom {
+    border: 1px solid #e9ecef !important;
+    border-radius: 12px !important;
+}

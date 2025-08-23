@@ -1,2 +1,35 @@
+modules = ["php", "postgresql-16"]
 [agent]
 expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["php", "php81Extensions.pdo", "php81Extensions.pdo_pgsql", "php81Extensions.pgsql", "php81Extensions.session", "php81Extensions.mbstring"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "PHP PDV Server"
+
+[[workflows.workflow]]
+name = "PHP PDV Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:5000 -t ."
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
