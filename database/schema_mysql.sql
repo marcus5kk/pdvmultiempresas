@@ -109,8 +109,8 @@ INSERT IGNORE INTO products (name, barcode, description, category_id, price, cos
 ('Fone de Ouvido', '1234567890123', 'Fone de ouvido com fio P2', 4, 25.00, 15.00, 30, 5, 'un');
 
 -- Índices para melhor performance
-CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
-CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
-CREATE INDEX IF NOT EXISTS idx_sales_created_at ON sales(created_at);
-CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id);
-CREATE INDEX IF NOT EXISTS idx_stock_movements_product_id ON stock_movements(product_id);
+CREATE INDEX idx_products_barcode ON products(barcode);
+CREATE INDEX idx_products_name ON products(name);
+CREATE INDEX idx_sales_created_at ON sales(created_at);
+CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
+CREATE INDEX idx_stock_movements_product_id ON stock_movements(product_id);

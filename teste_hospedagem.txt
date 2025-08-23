@@ -1,0 +1,39 @@
+INSTRUÇÕES PARA TESTAR NA HOSPEDAGEM:
+======================================
+
+1. CORRIGINDO O MYSQL:
+   - Use o novo arquivo database/schema_mysql.sql (já corrigido)
+   - Removi "IF NOT EXISTS" dos índices para compatibilidade
+
+2. CONFIGURAÇÃO PARA HOSPEDAGEM:
+   - No arquivo config/config.php, configure:
+     
+     define('DB_TYPE', 'mysql');
+     define('DB_HOST', 'localhost');  // ou seu host MySQL
+     define('DB_DATABASE', 'pdv_system');  // nome do seu banco
+     define('DB_USERNAME', 'seu_usuario');
+     define('DB_PASSWORD', 'sua_senha');
+
+3. TESTE DOS CAMINHOS:
+   - Agora deve funcionar corretamente em: https://exemplo.com/pdv/
+   - E também em: https://exemplo.com/pdv/pages/login.php
+   - Sem mais redirecionamento duplo para /pages/pages/
+
+4. ESTRUTURA DE PASTAS:
+   Fazer upload de tudo para uma pasta (exemplo: /pdv/):
+   /pdv/
+   ├── api/
+   ├── assets/
+   ├── config/
+   ├── database/
+   ├── includes/
+   ├── pages/
+   ├── index.php
+   ├── .htaccess
+   └── README.txt
+
+5. USUÁRIO PADRÃO:
+   Login: admin
+   Senha: password
+
+O sistema agora detecta automaticamente se está na raiz ou em subpasta!

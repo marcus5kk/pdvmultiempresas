@@ -10,7 +10,18 @@ function detectBasePath() {
             const scriptPath = scriptUrl.pathname;
             // Remove '/assets/js/config.js' para obter o caminho base
             const basePath = scriptPath.replace('/assets/js/config.js', '');
-            return basePath || '/';
+            
+            // Se basePath está vazio, estamos na raiz
+            if (!basePath || basePath === '') {
+                return '/';
+            }
+            
+            // Garantir que termine com /
+            if (!basePath.endsWith('/')) {
+                basePath += '/';
+            }
+            
+            return basePath;
         }
     }
     
@@ -19,20 +30,27 @@ function detectBasePath() {
     
     // Se estamos em uma página dentro de /pages/, o base é um nível acima
     if (currentPath.includes('/pages/')) {
-        const parts = currentPath.split('/pages/');
-        return parts[0] || '/';
+        // Encontrar a posição de /pages/ e pegar tudo antes
+        const pagesIndex = currentPath.lastIndexOf('/pages/');
+        if (pagesIndex >= 0) {
+            let basePath = currentPath.substring(0, pagesIndex);
+            
+            // Se basePath está vazio, estamos na raiz
+            if (!basePath || basePath === '') {
+                return '/';
+            }
+            
+            // Garantir que termine com /
+            if (!basePath.endsWith('/')) {
+                basePath += '/';
+            }
+            
+            return basePath;
+        }
     }
     
-    // Se estamos na raiz ou em outro diretório
-    const pathParts = currentPath.split('/');
-    pathParts.pop(); // Remove o arquivo atual
-    
-    let basePath = pathParts.join('/');
-    if (basePath && !basePath.endsWith('/')) {
-        basePath += '/';
-    }
-    
-    return basePath || '/';
+    // Se não conseguiu detectar, assumir raiz
+    return '/';
 }
 
 // Configuração global do sistema
@@ -61,13 +79,9 @@ window.PDV_CONFIG = {
     }
 };
 
-// Debug para verificar os caminhos detectados
-console.log('PDV Config:', {
-    basePath: window.PDV_CONFIG.basePath,
-    apiPath: window.PDV_CONFIG.apiPath(),
-    pagesPath: window.PDV_CONFIG.pagesPath(),
-    currentLocation: window.location.pathname
-});
+// Debug removido para produção
+// Para debug, descomente a linha abaixo:
+// console.log('PDV Config:', window.PDV_CONFIG);
 
 // Função utilitária para construir URLs da API
 function apiUrl(endpoint) {

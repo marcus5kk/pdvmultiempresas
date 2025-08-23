@@ -3,13 +3,18 @@
 
 RewriteEngine On
 
-# Permitir acesso aos arquivos estáticos
+# Permitir acesso aos arquivos estáticos e pastas principais
 RewriteRule ^(assets|api|pages|includes|config|database)/ - [L]
 
-# Redirecionar para a página de login se não autenticado
-RewriteRule ^$ pages/login.php [L]
+# Redirecionar apenas se não estiver tentando acessar uma pasta específica
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^.*/pages/.*$
+RewriteRule ^$ pages/dashboard.php [L]
 
-# Permitir acesso direto às páginas
+# URLs amigáveis (opcional)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^login$ pages/login.php [L]
 RewriteRule ^dashboard$ pages/dashboard.php [L]
 RewriteRule ^pdv$ pages/pdv.php [L]

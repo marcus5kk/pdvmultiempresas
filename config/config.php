@@ -16,7 +16,20 @@ function getBaseUrl() {
         $path = dirname($path);
     }
     
-    // Garantir que termine com /
+    // Se estivermos em config, voltar um nível também
+    if (basename($path) === 'config') {
+        $path = dirname($path);
+    }
+    
+    // Normalizar o caminho
+    $path = str_replace('\\', '/', $path);
+    
+    // Se estamos na raiz, path será /
+    if ($path === '.' || $path === '') {
+        $path = '/';
+    }
+    
+    // Garantir que termine com / se não for apenas /
     if ($path !== '/' && substr($path, -1) !== '/') {
         $path .= '/';
     }
