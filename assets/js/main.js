@@ -38,19 +38,19 @@ class PDVSystem {
 
     async checkSession() {
         try {
-            const response = await fetch('../api/auth.php?action=check_session');
+            const response = await fetch(apiUrl('auth.php?action=check_session'));
             const data = await response.json();
             
             if (data.success) {
                 this.user = data.data.user;
                 this.updateUI();
-            } else if (window.location.pathname !== '/pages/login.php') {
-                window.location.href = 'pages/login.php';
+            } else if (!window.location.pathname.includes('login.php')) {
+                window.location.href = pageUrl('login.php');
             }
         } catch (error) {
             console.error('Error checking session:', error);
-            if (window.location.pathname !== '/pages/login.php') {
-                window.location.href = 'pages/login.php';
+            if (!window.location.pathname.includes('login.php')) {
+                window.location.href = pageUrl('login.php');
             }
         }
     }
@@ -65,7 +65,7 @@ class PDVSystem {
             submitBtn.innerHTML = '<span class="loading"></span> Entrando...';
             submitBtn.disabled = true;
 
-            const response = await fetch('../api/auth.php', {
+            const response = await fetch(apiUrl('auth.php'), {
                 method: 'POST',
                 body: formData
             });
@@ -76,7 +76,7 @@ class PDVSystem {
                 this.user = data.data.user;
                 this.showAlert('success', 'Login realizado com sucesso!');
                 setTimeout(() => {
-                    window.location.href = 'dashboard.php';
+                    window.location.href = pageUrl('dashboard.php');
                 }, 1000);
             } else {
                 this.showAlert('danger', data.message);
@@ -92,16 +92,16 @@ class PDVSystem {
 
     async logout() {
         try {
-            const response = await fetch('../api/auth.php?action=logout');
+            const response = await fetch(apiUrl('auth.php?action=logout'));
             const data = await response.json();
 
             if (data.success) {
                 this.user = null;
-                window.location.href = 'login.php';
+                window.location.href = pageUrl('login.php');
             }
         } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = 'login.php';
+            window.location.href = pageUrl('login.php');
         }
     }
 
@@ -127,7 +127,7 @@ class PDVSystem {
     }
 
     navigateTo(page) {
-        window.location.href = `${page}.php`;
+        window.location.href = pageUrl(`${page}.php`);
     }
 
     loadInitialData() {
@@ -155,7 +155,7 @@ class PDVSystem {
 
     async loadDashboardData() {
         try {
-            const response = await fetch('../api/reports.php?action=dashboard');
+            const response = await fetch(apiUrl('reports.php?action=dashboard'));
             const data = await response.json();
 
             if (data.success) {
@@ -191,7 +191,7 @@ class PDVSystem {
 
     async loadRecentSales() {
         try {
-            const response = await fetch('../api/sales.php?action=recent&limit=5');
+            const response = await fetch(apiUrl('sales.php?action=recent&limit=5'));
             const data = await response.json();
 
             if (data.success) {
@@ -231,7 +231,7 @@ class PDVSystem {
         const limit = 50;
 
         try {
-            const response = await fetch(`../api/products.php?page=${page}&limit=${limit}`);
+            const response = await fetch(apiUrl(`products.php?page=${page}&limit=${limit}`));
             const data = await response.json();
 
             if (data.success) {

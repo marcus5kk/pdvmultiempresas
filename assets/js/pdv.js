@@ -69,7 +69,7 @@ class PDVManager {
 
     async loadCategories() {
         try {
-            const response = await fetch('../api/products.php?action=categories');
+            const response = await fetch(apiUrl('products.php?action=categories'));
             const data = await response.json();
 
             if (data.success) {
@@ -107,7 +107,7 @@ class PDVManager {
         }
 
         try {
-            const response = await fetch(`../api/products.php?action=search&term=${encodeURIComponent(term)}`);
+            const response = await fetch(apiUrl(`products.php?action=search&term=${encodeURIComponent(term)}`));
             const data = await response.json();
 
             if (data.success) {
@@ -122,7 +122,7 @@ class PDVManager {
         if (!barcode.trim()) return;
 
         try {
-            const response = await fetch(`../api/products.php?action=search&barcode=${encodeURIComponent(barcode)}`);
+            const response = await fetch(apiUrl(`products.php?action=search&barcode=${encodeURIComponent(barcode)}`));
             const data = await response.json();
 
             if (data.success && data.data.length > 0) {
@@ -366,7 +366,7 @@ class PDVManager {
                 notes: notes
             };
 
-            const response = await fetch('../api/sales.php', {
+            const response = await fetch(apiUrl('sales.php'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

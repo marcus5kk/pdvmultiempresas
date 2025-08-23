@@ -228,6 +228,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
+    <script src="../assets/js/config.js"></script>
     <script src="../assets/js/main.js"></script>
     
     <script>
@@ -242,7 +243,7 @@
 
     async function loadCategories() {
         try {
-            const response = await fetch('../api/products.php?action=categories');
+            const response = await fetch(apiUrl('products.php?action=categories'));
             const data = await response.json();
 
             if (data.success) {
@@ -276,7 +277,7 @@
             const data = Object.fromEntries(formData.entries());
             
             try {
-                const url = currentProductId ? `../api/products.php?id=${currentProductId}` : '../api/products.php';
+                const url = currentProductId ? apiUrl(`products.php?id=${currentProductId}`) : apiUrl('products.php');
                 const method = currentProductId ? 'PUT' : 'POST';
                 
                 const response = await fetch(url, {
@@ -331,7 +332,7 @@
 
     async function loadProductForEdit(id) {
         try {
-            const response = await fetch(`../api/products.php?id=${id}`);
+            const response = await fetch(apiUrl(`products.php?id=${id}`));
             const data = await response.json();
 
             if (data.success) {
@@ -358,7 +359,7 @@
         }
 
         try {
-            const response = await fetch(`../api/products.php?id=${id}`, {
+            const response = await fetch(apiUrl(`products.php?id=${id}`), {
                 method: 'DELETE'
             });
 
