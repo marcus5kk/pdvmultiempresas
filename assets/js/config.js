@@ -2,26 +2,30 @@
 // Detecta automaticamente o diretório base do sistema
 
 function detectBasePath() {
-    const currentPath = window.location.pathname;
-    const scriptElements = document.getElementsByTagName('script');
-    
-    // Procurar pelo script config.js para determinar o caminho base
-    for (let script of scriptElements) {
+    // Método mais confiável: usar o caminho do script config.js
+    const scripts = document.getElementsByTagName('script');
+    for (let script of scripts) {
         if (script.src && script.src.includes('assets/js/config.js')) {
-            const scriptPath = script.src;
-            const baseUrl = scriptPath.replace('/assets/js/config.js', '');
-            return baseUrl.replace(window.location.origin, '');
+            const scriptUrl = new URL(script.src);
+            const scriptPath = scriptUrl.pathname;
+            // Remove '/assets/js/config.js' para obter o caminho base
+            const basePath = scriptPath.replace('/assets/js/config.js', '');
+            return basePath || '/';
         }
     }
     
-    // Fallback: detectar pelo caminho atual
-    const pathParts = currentPath.split('/');
-    pathParts.pop(); // Remove o nome da página atual
+    // Fallback: detectar pelo caminho atual da página
+    const currentPath = window.location.pathname;
     
-    // Se estiver na pasta pages, voltar um nível
-    if (pathParts[pathParts.length - 1] === 'pages') {
-        pathParts.pop();
+    // Se estamos em uma página dentro de /pages/, o base é um nível acima
+    if (currentPath.includes('/pages/')) {
+        const parts = currentPath.split('/pages/');
+        return parts[0] || '/';
     }
+    
+    // Se estamos na raiz ou em outro diretório
+    const pathParts = currentPath.split('/');
+    pathParts.pop(); // Remove o arquivo atual
     
     let basePath = pathParts.join('/');
     if (basePath && !basePath.endsWith('/')) {
@@ -35,15 +39,35 @@ function detectBasePath() {
 window.PDV_CONFIG = {
     basePath: detectBasePath(),
     apiPath: function() {
-        return this.basePath + 'api/';
+        let base = this.basePath;
+        if (base === '/') {
+            return '/api/';
+        }
+        return base + (base.endsWith('/') ? '' : '/') + 'api/';
     },
     assetsPath: function() {
-        return this.basePath + 'assets/';
+        let base = this.basePath;
+        if (base === '/') {
+            return '/assets/';
+        }
+        return base + (base.endsWith('/') ? '' : '/') + 'assets/';
     },
     pagesPath: function() {
-        return this.basePath + 'pages/';
+        let base = this.basePath;
+        if (base === '/') {
+            return '/pages/';
+        }
+        return base + (base.endsWith('/') ? '' : '/') + 'pages/';
     }
 };
+
+// Debug para verificar os caminhos detectados
+console.log('PDV Config:', {
+    basePath: window.PDV_CONFIG.basePath,
+    apiPath: window.PDV_CONFIG.apiPath(),
+    pagesPath: window.PDV_CONFIG.pagesPath(),
+    currentLocation: window.location.pathname
+});
 
 // Função utilitária para construir URLs da API
 function apiUrl(endpoint) {
