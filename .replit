@@ -1,10 +1,10 @@
-modules = ["php", "postgresql-16"]
+modules = ["php-8.2", "nodejs-20", "web", "postgresql-16"]
 [agent]
 expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["php", "php81Extensions.pdo", "php81Extensions.pdo_pgsql", "php81Extensions.pgsql", "php81Extensions.session", "php81Extensions.mbstring"]
+packages = ["php", "php81Extensions.pdo", "php81Extensions.pdo_pgsql", "php81Extensions.pgsql", "php81Extensions.session", "php81Extensions.mbstring", "php84", "php84Extensions.pgsql", "php84Extensions.pdo", "php84Extensions.pdo_pgsql"]
 
 [workflows]
 runButton = "Project"
