@@ -49,13 +49,13 @@ define('BASE_PATH', getBasePath());
 
 // Configurações do banco de dados
 // Para PostgreSQL (padrão do Replit)
-define('DB_TYPE', $_ENV['DB_TYPE'] ?? 'postgresql');
+define('DB_TYPE', $_ENV['DB_TYPE'] ?? 'mysql');
 
 // Para MySQL/MySQLi (quando usar em hospedagem própria)
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_DATABASE', $_ENV['DB_DATABASE'] ?? 'pdv_system');
-define('DB_USERNAME', $_ENV['DB_USERNAME'] ?? 'root');
-define('DB_PASSWORD', $_ENV['DB_PASSWORD'] ?? '');
+define('DB_DATABASE', $_ENV['DB_DATABASE'] ?? 'marc4901_pdv');
+define('DB_USERNAME', $_ENV['DB_USERNAME'] ?? 'marc4901_pdv');
+define('DB_PASSWORD', $_ENV['DB_PASSWORD'] ?? 'Ma35881706');
 define('DB_PORT', $_ENV['DB_PORT'] ?? '3306');
 
 // Configurações de sessão

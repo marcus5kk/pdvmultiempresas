@@ -1,4 +1,13 @@
 <?php
+// Desabilita erros visíveis para API - configuração robusta
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(0);
+
+// Buffer de saída para evitar saída de erros
+ob_start();
+
 session_start();
 require_once '../config/database.php';
 
@@ -12,6 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 function sendResponse($success, $message, $data = null) {
+    // Limpar qualquer saída anterior (erros PHP, etc)
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
+    // Garantir header JSON
+    header('Content-Type: application/json');
+    
     echo json_encode([
         'success' => $success,
         'message' => $message,

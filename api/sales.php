@@ -1,7 +1,26 @@
 <?php
+// Desabilita erros visíveis para API - configuração robusta
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(0);
+
+// Buffer de saída para evitar saída de erros
+ob_start();
+
 session_start();
 require_once '../config/database.php';
-require_once '../includes/auth_check.php';
+
+// Verificação de sessão para API - retorna JSON em vez de redirect
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'message' => 'Sessão expirada. Faça login novamente.',
+        'data' => null
+    ]);
+    exit;
+}
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -13,6 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 function sendResponse($success, $message, $data = null) {
+    // Limpar qualquer saída anterior (erros PHP, etc)
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
+    // Garantir header JSON
+    header('Content-Type: application/json');
+    
     echo json_encode([
         'success' => $success,
         'message' => $message,
@@ -22,8 +49,12 @@ function sendResponse($success, $message, $data = null) {
 }
 
 function recordStockMovement($db, $product_id, $quantity, $sale_id) {
-    $stmt = $db->prepare("INSERT INTO stock_movements (product_id, movement_type, quantity, reference_type, reference_id, user_id) VALUES (?, 'out', ?, 'sale', ?, ?)");
-    $stmt->execute([$product_id, $quantity, $sale_id, $_SESSION['user_id']]);
+    try {
+        $stmt = $db->prepare("INSERT INTO stock_movements (product_id, movement_type, quantity, reference_type, reference_id, user_id) VALUES (?, 'out', ?, 'sale', ?, ?)");
+        $stmt->execute([$product_id, $quantity, $sale_id, $_SESSION['user_id']]);
+    } catch (Exception $e) {
+        error_log("Stock movement error: " . $e->getMessage());
+    }
 }
 
 try {
@@ -54,7 +85,21 @@ try {
             break;
             
         case 'POST':
-            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            // Pegar dados tanto de JSON quanto de POST para compatibilidade
+            $input = [];
+            
+            // Tentar JSON primeiro
+            $json_input = json_decode(file_get_contents('php://input'), true);
+            if ($json_input) {
+                $input = $json_input;
+            } else {
+                // Se JSON falhar, usar POST
+                $input = $_POST;
+                // Decodificar items se vier como string
+                if (isset($input['items']) && is_string($input['items'])) {
+                    $input['items'] = json_decode($input['items'], true);
+                }
+            }
             
             $items = $input['items'] ?? [];
             $payment_method = trim($input['payment_method'] ?? '');
@@ -119,10 +164,25 @@ try {
                     throw new Exception('Valor do pagamento insuficiente');
                 }
                 
-                // Create sale
-                $stmt = $db->prepare("INSERT INTO sales (user_id, total_amount, discount, tax, payment_method, payment_amount, change_amount, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id");
-                $stmt->execute([$_SESSION['user_id'], $total_amount, $discount, $tax, $payment_method, $payment_amount, $change_amount, $notes]);
-                $sale_id = $stmt->fetch()['id'];
+                // Create sale - compatível com PostgreSQL
+                $database_type = DB_TYPE;
+                
+                if ($database_type === 'postgresql') {
+                    // PostgreSQL com RETURNING
+                    $stmt = $db->prepare("INSERT INTO sales (user_id, total_amount, discount, tax, payment_method, payment_amount, change_amount, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id");
+                    $stmt->execute([$_SESSION['user_id'], $total_amount, $discount, $tax, $payment_method, $payment_amount, $change_amount, $notes]);
+                    $result = $stmt->fetch();
+                    $sale_id = $result['id'] ?? null;
+                } else {
+                    // MySQL com lastInsertId
+                    $stmt = $db->prepare("INSERT INTO sales (user_id, total_amount, discount, tax, payment_method, payment_amount, change_amount, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$_SESSION['user_id'], $total_amount, $discount, $tax, $payment_method, $payment_amount, $change_amount, $notes]);
+                    $sale_id = $db->lastInsertId();
+                }
+                
+                if (!$sale_id) {
+                    throw new Exception('Erro ao criar venda - ID não obtido');
+                }
                 
                 // Create sale items and update stock
                 foreach ($validated_items as $item) {
@@ -147,7 +207,7 @@ try {
                 ]);
                 
             } catch (Exception $e) {
-                $db->rollBack();
+                $db->rollback();
                 throw $e;
             }
             break;
@@ -157,7 +217,20 @@ try {
     }
     
 } catch (Exception $e) {
+    // Limpar buffer de erros
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
     error_log("Sales API Error: " . $e->getMessage());
     sendResponse(false, 'Erro ao processar venda: ' . $e->getMessage());
+} catch (Error $e) {
+    // Capturar erros fatais também
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
+    error_log("Sales API Fatal Error: " . $e->getMessage());
+    sendResponse(false, 'Erro interno do servidor');
 }
 ?>

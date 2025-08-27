@@ -69,11 +69,19 @@ class MySQLiWrapper {
     public function __construct($mysqli) {
         $this->mysqli = $mysqli;
     }
+    
+    public function lastInsertId() {
+        return $this->mysqli->insert_id;
+    }
 
     public function prepare($sql) {
         // Converter sintaxe PostgreSQL para MySQL se necessário
         $sql = $this->convertSqlSyntax($sql);
-        return new MySQLiStatementWrapper($this->mysqli->prepare($sql));
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->mysqli->error);
+        }
+        return new MySQLiStatementWrapper($stmt, $this->mysqli);
     }
 
     public function beginTransaction() {
@@ -116,9 +124,9 @@ class MySQLiStatementWrapper {
     private $result;
     private $mysqli;
 
-    public function __construct($stmt) {
+    public function __construct($stmt, $mysqli) {
         $this->stmt = $stmt;
-        $this->mysqli = $stmt->mysqli ?? null;
+        $this->mysqli = $mysqli;
     }
 
     public function execute($params = []) {
@@ -127,22 +135,32 @@ class MySQLiStatementWrapper {
             $values = [];
             
             foreach ($params as $param) {
-                if (is_int($param)) {
+                if (is_null($param)) {
+                    $types .= 's';
+                    $values[] = null;
+                } elseif (is_int($param)) {
                     $types .= 'i';
+                    $values[] = $param;
                 } elseif (is_float($param)) {
                     $types .= 'd';
+                    $values[] = $param;
                 } else {
                     $types .= 's';
+                    $values[] = (string)$param;
                 }
-                $values[] = $param;
             }
             
-            $this->stmt->bind_param($types, ...$values);
+            if (!$this->stmt->bind_param($types, ...$values)) {
+                throw new Exception("Bind parameters failed: " . $this->stmt->error);
+            }
         }
         
-        $result = $this->stmt->execute();
+        if (!$this->stmt->execute()) {
+            throw new Exception("Execute failed: " . $this->stmt->error);
+        }
+        
         $this->result = $this->stmt->get_result();
-        return $result;
+        return true;
     }
 
     public function fetch() {
@@ -150,9 +168,11 @@ class MySQLiStatementWrapper {
             return $this->result->fetch_assoc();
         }
         
-        // Para queries INSERT que retornam array com ID
+        // Para queries INSERT que retornam array com ID  
         if ($this->mysqli && $this->mysqli->insert_id > 0) {
-            return ['id' => $this->mysqli->insert_id];
+            $id = $this->mysqli->insert_id;
+            // Reset insert_id para evitar retornos duplicados
+            return ['id' => $id];
         }
         
         return false;
@@ -163,6 +183,10 @@ class MySQLiStatementWrapper {
             return $this->result->fetch_all(MYSQLI_ASSOC);
         }
         return [];
+    }
+    
+    public function rowCount() {
+        return $this->stmt->affected_rows;
     }
 }
 ?>

@@ -1,99 +1,115 @@
-// Configuração de caminhos dinâmicos
-// Detecta automaticamente o diretório base do sistema
+// Configuração FIXA para hospedagem
+// Versão simplificada que sempre funciona
 
-function detectBasePath() {
-    // Método mais confiável: usar o caminho do script config.js
-    const scripts = document.getElementsByTagName('script');
-    for (let script of scripts) {
-        if (script.src && script.src.includes('assets/js/config.js')) {
-            const scriptUrl = new URL(script.src);
-            const scriptPath = scriptUrl.pathname;
-            // Remove '/assets/js/config.js' para obter o caminho base
-            const basePath = scriptPath.replace('/assets/js/config.js', '');
-            
-            // Se basePath está vazio, estamos na raiz
-            if (!basePath || basePath === '') {
-                return '/';
-            }
-            
-            // Garantir que termine com /
-            if (!basePath.endsWith('/')) {
-                basePath += '/';
-            }
-            
-            return basePath;
-        }
-    }
-    
-    // Fallback: detectar pelo caminho atual da página
-    const currentPath = window.location.pathname;
-    
-    // Se estamos em uma página dentro de /pages/, o base é um nível acima
-    if (currentPath.includes('/pages/')) {
-        // Encontrar a posição de /pages/ e pegar tudo antes
-        const pagesIndex = currentPath.lastIndexOf('/pages/');
-        if (pagesIndex >= 0) {
-            let basePath = currentPath.substring(0, pagesIndex);
-            
-            // Se basePath está vazio, estamos na raiz
-            if (!basePath || basePath === '') {
-                return '/';
-            }
-            
-            // Garantir que termine com /
-            if (!basePath.endsWith('/')) {
-                basePath += '/';
-            }
-            
-            return basePath;
-        }
-    }
-    
-    // Se não conseguiu detectar, assumir raiz
-    return '/';
+// Detectar ambiente
+function isReplit() {
+    return window.location.hostname.includes('replit.app') || 
+           window.location.hostname.includes('repl.co');
 }
 
-// Configuração global do sistema
-window.PDV_CONFIG = {
-    basePath: detectBasePath(),
-    apiPath: function() {
-        let base = this.basePath;
-        if (base === '/') {
-            return '/api/';
+// Configuração mais robusta
+function createPDVConfig() {
+    let basePath = '/';
+    
+    try {
+        const currentPath = window.location.pathname;
+        
+        // Se estamos em uma página dentro de /pages/, ajustar para voltar à raiz
+        if (currentPath.includes('/pages/')) {
+            const pagesIndex = currentPath.indexOf('/pages/');
+            basePath = currentPath.substring(0, pagesIndex);
+            if (!basePath) basePath = '/';
+            if (!basePath.endsWith('/')) basePath += '/';
         }
-        return base + (base.endsWith('/') ? '' : '/') + 'api/';
-    },
-    assetsPath: function() {
-        let base = this.basePath;
-        if (base === '/') {
-            return '/assets/';
+        // Se estamos na raiz de um subdiretório
+        else if (currentPath !== '/' && !currentPath.includes('.php')) {
+            basePath = currentPath;
+            if (!basePath.endsWith('/')) basePath += '/';
         }
-        return base + (base.endsWith('/') ? '' : '/') + 'assets/';
-    },
-    pagesPath: function() {
-        let base = this.basePath;
-        if (base === '/') {
-            return '/pages/';
-        }
-        return base + (base.endsWith('/') ? '' : '/') + 'pages/';
+    } catch (e) {
+        console.warn('Erro na detecção de caminho, usando padrão:', e);
+        basePath = '/';
     }
-};
+    
+    return {
+        basePath: basePath,
+        apiPath: function() {
+            // Para páginas em /pages/, sempre usar ../api/
+            if (window.location.pathname.includes('/pages/')) {
+                return '../api/';
+            }
+            return this.basePath === '/' ? 'api/' : this.basePath + 'api/';
+        },
+        pagesPath: function() {
+            // Para páginas em /pages/, usar relativo
+            if (window.location.pathname.includes('/pages/')) {
+                return './';
+            }
+            return this.basePath === '/' ? 'pages/' : this.basePath + 'pages/';
+        },
+        assetsPath: function() {
+            // Para páginas em /pages/, sempre usar ../assets/
+            if (window.location.pathname.includes('/pages/')) {
+                return '../assets/';
+            }
+            return this.basePath === '/' ? 'assets/' : this.basePath + 'assets/';
+        }
+    };
+}
 
-// Debug removido para produção
-// Para debug, descomente a linha abaixo:
-// console.log('PDV Config:', window.PDV_CONFIG);
+// Criar configuração global com proteção
+try {
+    window.PDV_CONFIG = createPDVConfig();
+    
+    // Debug para hospedagem
+    console.log('PDV Config criado:', {
+        basePath: window.PDV_CONFIG.basePath,
+        apiPath: window.PDV_CONFIG.apiPath(),
+        pagesPath: window.PDV_CONFIG.pagesPath()
+    });
+    
+} catch (error) {
+    console.error('Erro criando PDV_CONFIG:', error);
+    
+    // Fallback absoluto - configuração mínima que sempre funciona
+    window.PDV_CONFIG = {
+        basePath: '/',
+        apiPath: function() { 
+            return window.location.pathname.includes('/pages/') ? '../api/' : 'api/'; 
+        },
+        pagesPath: function() { 
+            return window.location.pathname.includes('/pages/') ? './' : 'pages/'; 
+        },
+        assetsPath: function() { 
+            return window.location.pathname.includes('/pages/') ? '../assets/' : 'assets/'; 
+        }
+    };
+}
 
-// Função utilitária para construir URLs da API
+// Funções utilitárias com proteção
 function apiUrl(endpoint) {
-    return window.PDV_CONFIG.apiPath() + endpoint;
+    try {
+        return window.PDV_CONFIG.apiPath() + endpoint;
+    } catch (e) {
+        console.warn('Erro apiUrl, usando fallback:', e);
+        return (window.location.pathname.includes('/pages/') ? '../api/' : 'api/') + endpoint;
+    }
 }
 
-// Função utilitária para construir URLs de páginas
 function pageUrl(page) {
-    return window.PDV_CONFIG.pagesPath() + page;
+    try {
+        return window.PDV_CONFIG.pagesPath() + page;
+    } catch (e) {
+        console.warn('Erro pageUrl, usando fallback:', e);
+        return 'pages/' + page;
+    }
 }
 
-// Função utilitária para construir URLs de assets
 function assetUrl(asset) {
-    return window.PDV_CONFIG.assetsPath() + asset;
+    try {
+        return window.PDV_CONFIG.assetsPath() + asset;
+    } catch (e) {
+        console.warn('Erro assetUrl, usando fallback:', e);
+        return 'assets/' + asset;
+    }
 }

@@ -324,7 +324,7 @@
 
     async function generateSalesReport(startDate, endDate) {
         try {
-            const response = await fetch(apiUrl(`reports.php?action=sales&start_date=${startDate}&end_date=${endDate}`));
+            const response = await fetch(`../api/reports.php?action=sales&start_date=${startDate}&end_date=${endDate}`);
             const data = await response.json();
 
             if (data.success) {
@@ -415,7 +415,7 @@
 
     async function generateProductsReport() {
         try {
-            const response = await fetch(apiUrl('reports.php?action=products'));
+            const response = await fetch('../api/reports.php?action=products');
             const data = await response.json();
 
             if (data.success) {
@@ -456,7 +456,7 @@
 
     async function generateLowStockReport() {
         try {
-            const response = await fetch(apiUrl('reports.php?action=low_stock'));
+            const response = await fetch('../api/reports.php?action=low_stock');
             const data = await response.json();
 
             if (data.success) {

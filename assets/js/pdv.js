@@ -374,7 +374,19 @@ class PDVManager {
                 body: JSON.stringify(saleData)
             });
 
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const responseText = await response.text();
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                console.error('Resposta não é JSON válido:', responseText);
+                throw new Error('Erro na comunicação com o servidor. Verifique os logs.');
+            }
 
             if (data.success) {
                 pdvSystem.showAlert('success', 'Venda realizada com sucesso!');
