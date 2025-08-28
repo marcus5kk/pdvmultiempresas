@@ -56,7 +56,7 @@ try {
                 sendResponse(false, 'Usuário e senha são obrigatórios');
             }
             
-            $stmt = $db->prepare("SELECT id, username, password, full_name, role, active FROM users WHERE username = ? AND active = true");
+            $stmt = $db->prepare("SELECT id, username, password, full_name, email, role, company_id, active FROM users WHERE username = ? AND active = true");
             $stmt->execute([$username]);
             $user = $stmt->fetch();
             
@@ -68,13 +68,15 @@ try {
             $_SESSION['username'] = $user['username'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role'] = $user['role'];
+            $_SESSION['company_id'] = $user['company_id'];
             
             sendResponse(true, 'Login realizado com sucesso', [
                 'user' => [
                     'id' => $user['id'],
                     'username' => $user['username'],
                     'full_name' => $user['full_name'],
-                    'role' => $user['role']
+                    'role' => $user['role'],
+                    'company_id' => $user['company_id']
                 ]
             ]);
             break;
@@ -94,7 +96,8 @@ try {
                     'id' => $_SESSION['user_id'],
                     'username' => $_SESSION['username'],
                     'full_name' => $_SESSION['full_name'],
-                    'role' => $_SESSION['role']
+                    'role' => $_SESSION['role'],
+                    'company_id' => $_SESSION['company_id'] ?? null
                 ]
             ]);
             break;

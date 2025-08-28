@@ -60,13 +60,70 @@ function hasRole($required_role) {
     
     $user_role = $_SESSION['role'];
     
-    // Admin has access to everything
-    if ($user_role === 'admin') {
+    // System admin has access to everything
+    if ($user_role === 'system_admin' || $user_role === 'admin') {
         return true;
     }
     
     // Check specific role
     return $user_role === $required_role;
+}
+
+// Function to check if user is system admin
+function isSystemAdmin() {
+    return hasRole('system_admin') || hasRole('admin');
+}
+
+// Function to check if user is company admin (for their company)
+function isCompanyAdmin() {
+    $user_role = $_SESSION['role'] ?? '';
+    return $user_role === 'company_admin' || isSystemAdmin();
+}
+
+// Function to check if user can access company data
+function canAccessCompany($company_id = null) {
+    $user_role = $_SESSION['role'] ?? '';
+    $user_company_id = $_SESSION['company_id'] ?? null;
+    
+    // System admin can access any company
+    if (isSystemAdmin()) {
+        return true;
+    }
+    
+    // If no specific company requested, check if user has a company
+    if ($company_id === null) {
+        return $user_company_id !== null;
+    }
+    
+    // Check if user belongs to the requested company
+    return $user_company_id == $company_id;
+}
+
+// Function to get user company ID
+function getUserCompanyId() {
+    return $_SESSION['company_id'] ?? null;
+}
+
+// Function to check if user can access PDV
+function canAccessPDV() {
+    $user_role = $_SESSION['role'] ?? '';
+    return in_array($user_role, ['system_admin', 'admin', 'company_admin', 'company_operator']);
+}
+
+// Function to check if user can access admin features
+function canAccessAdminFeatures() {
+    $user_role = $_SESSION['role'] ?? '';
+    return in_array($user_role, ['system_admin', 'admin', 'company_admin']);
+}
+
+// Function to check if user can access reports
+function canAccessReports() {
+    return canAccessAdminFeatures();
+}
+
+// Function to check if user can manage products
+function canManageProducts() {
+    return canAccessAdminFeatures();
 }
 
 // Function to require specific role (redirect if not authorized)
