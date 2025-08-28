@@ -5,6 +5,22 @@
 -- CREATE DATABASE pdv_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- USE pdv_system;
 
+-- Tabela de empresas
+CREATE TABLE IF NOT EXISTS companies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    document VARCHAR(20) UNIQUE,
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(2),
+    zipcode VARCHAR(10),
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Tabela de usuários
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -12,10 +28,12 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100),
-    role VARCHAR(20) DEFAULT 'operator',
+    role VARCHAR(20) DEFAULT 'company_operator',
+    company_id INT,
     active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
 );
 
 -- Tabela de categorias de produtos
@@ -88,9 +106,13 @@ CREATE TABLE IF NOT EXISTS stock_movements (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Inserir empresa principal
+INSERT IGNORE INTO companies (id, name, document, email, active) VALUES 
+(1, 'Sistema Principal', '00000000000000', 'admin@sistema.com', true);
+
 -- Inserir usuário padrão (admin/password)
-INSERT IGNORE INTO users (username, password, full_name, role) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrador', 'admin');
+INSERT IGNORE INTO users (username, password, full_name, role, company_id) 
+VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrador', 'system_admin', NULL);
 
 -- Inserir algumas categorias padrão
 INSERT IGNORE INTO categories (name, description) VALUES 

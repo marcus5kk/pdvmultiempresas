@@ -39,6 +39,7 @@ Após fazer as alterações, acesse o sistema. Se der erro de conexão:
 ### 5. Login padrão
 - Usuário: admin
 - Senha: password
+- Tipo: Administrador do Sistema (pode gerenciar empresas e usuários)
 
 ## Estrutura de arquivos que funciona nos dois ambientes:
 
@@ -47,3 +48,36 @@ Após fazer as alterações, acesse o sistema. Se der erro de conexão:
 - `database/schema_mysql.sql` - Para MySQL (hospedagem)
 
 O sistema foi projetado para funcionar em ambos os ambientes sem precisar alterar código PHP!
+
+## Estrutura do Sistema de Usuários:
+
+O sistema agora possui níveis hierárquicos de usuários:
+
+### 1. Administrador do Sistema (system_admin)
+- Pode gerenciar todas as empresas
+- Pode criar, editar e desativar empresas
+- Pode criar usuários para qualquer empresa
+- Acesso completo ao sistema
+
+### 2. Administrador da Empresa (company_admin) 
+- Acesso ao dashboard, relatórios, produtos e PDV da sua empresa
+- Pode gerenciar produtos da empresa
+- Pode ver relatórios da empresa
+- Não pode gerenciar outras empresas
+
+### 3. Operador da Empresa (company_operator)
+- Acesso apenas ao PDV (ponto de venda) da sua empresa
+- Pode fazer vendas
+- Não tem acesso a relatórios ou configurações
+
+## Novas Tabelas:
+
+### Tabela companies (empresas)
+- Armazena informações das empresas cadastradas
+- Cada empresa pode ter múltiplos usuários
+- Controle de status ativo/inativo
+
+### Tabela users (atualizada)
+- Agora inclui campo company_id (ligação com empresa)
+- Novos tipos de role: system_admin, company_admin, company_operator
+- Sistema de permissões baseado na empresa do usuário
