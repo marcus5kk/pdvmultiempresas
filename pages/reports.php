@@ -421,7 +421,11 @@
             salesChart.destroy();
         }
 
-        const labels = salesData.map(sale => formatDate(sale.sale_date));
+        // Formatação específica para o Chart.js - manter formato simples
+        const labels = salesData.map(sale => {
+            const parts = sale.sale_date.split('-');
+            return `${parts[2]}/${parts[1]}`;
+        });
         const amounts = salesData.map(sale => parseFloat(sale.total_amount) || 0);
 
         salesChart = new Chart(ctx, {
