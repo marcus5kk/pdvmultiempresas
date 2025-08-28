@@ -274,8 +274,48 @@
     
     <script>
     let salesChart = null;
+    
+    // Aguardar pdvSystem estar disponível
+    function waitForPdvSystem(callback) {
+        if (window.pdvSystem) {
+            callback();
+        } else {
+            setTimeout(() => waitForPdvSystem(callback), 50);
+        }
+    }
+    
+    // Funções auxiliares de formatação (fallback caso pdvSystem não esteja disponível)
+    function formatCurrency(value) {
+        if (window.pdvSystem) {
+            return pdvSystem.formatCurrency(value);
+        }
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value || 0);
+    }
+    
+    function formatDate(dateString) {
+        if (window.pdvSystem) {
+            return pdvSystem.formatDate(dateString);
+        }
+        return new Intl.DateTimeFormat('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(new Date(dateString));
+    }
+    
+    function showAlert(type, message) {
+        if (window.pdvSystem) {
+            pdvSystem.showAlert(type, message);
+        } else {
+            alert(message);
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
+        waitForPdvSystem(function() {
         // Set default dates
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -291,6 +331,7 @@
             document.getElementById('report-type').value = reportType;
             generateReport();
         }
+        }); // Fechamento do waitForPdvSystem
     });
 
     async function generateReport() {
@@ -335,18 +376,22 @@
             }
         } catch (error) {
             console.error('Error loading sales report:', error);
-            pdvSystem.showAlert('danger', 'Erro ao carregar relatório de vendas');
+            if (window.pdvSystem) {
+                pdvSystem.showAlert('danger', 'Erro ao carregar relatório de vendas');
+            } else {
+                alert('Erro ao carregar relatório de vendas');
+            }
         }
     }
 
     function displaySalesReport(data) {
         // Update summary
         document.getElementById('total-sales-count').textContent = data.totals.total_sales;
-        document.getElementById('total-sales-amount').textContent = pdvSystem.formatCurrency(data.totals.total_amount);
-        document.getElementById('total-discount').textContent = pdvSystem.formatCurrency(data.totals.total_discount);
+        document.getElementById('total-sales-amount').textContent = formatCurrency(data.totals.total_amount);
+        document.getElementById('total-discount').textContent = formatCurrency(data.totals.total_discount);
         
         const averageSale = data.totals.total_sales > 0 ? data.totals.total_amount / data.totals.total_sales : 0;
-        document.getElementById('average-sale').textContent = pdvSystem.formatCurrency(averageSale);
+        document.getElementById('average-sale').textContent = formatCurrency(averageSale);
 
         // Update details table
         const tbody = document.getElementById('sales-details-tbody');
@@ -355,11 +400,11 @@
         } else {
             tbody.innerHTML = data.sales.map(sale => `
                 <tr>
-                    <td>${pdvSystem.formatDate(sale.sale_date)}</td>
+                    <td>${formatDate(sale.sale_date)}</td>
                     <td>${sale.sales_count}</td>
-                    <td>${pdvSystem.formatCurrency(sale.total_amount)}</td>
-                    <td>${pdvSystem.formatCurrency(sale.total_discount)}</td>
-                    <td>${pdvSystem.formatCurrency(sale.total_tax)}</td>
+                    <td>${formatCurrency(sale.total_amount)}</td>
+                    <td>${formatCurrency(sale.total_discount)}</td>
+                    <td>${formatCurrency(sale.total_tax)}</td>
                 </tr>
             `).join('');
         }
@@ -375,7 +420,7 @@
             salesChart.destroy();
         }
 
-        const labels = salesData.map(sale => pdvSystem.formatDate(sale.sale_date));
+        const labels = salesData.map(sale => formatDate(sale.sale_date));
         const amounts = salesData.map(sale => parseFloat(sale.total_amount) || 0);
 
         salesChart = new Chart(ctx, {
@@ -426,7 +471,11 @@
             }
         } catch (error) {
             console.error('Error loading products report:', error);
-            pdvSystem.showAlert('danger', 'Erro ao carregar relatório de produtos');
+            if (window.pdvSystem) {
+                pdvSystem.showAlert('danger', 'Erro ao carregar relatório de produtos');
+            } else {
+                alert('Erro ao carregar relatório de produtos');
+            }
         }
     }
 
@@ -442,7 +491,7 @@
                     <td>${product.name}</td>
                     <td>${product.barcode || '-'}</td>
                     <td>${product.category_name || '-'}</td>
-                    <td>${pdvSystem.formatCurrency(product.price)}</td>
+                    <td>${formatCurrency(product.price)}</td>
                     <td>
                         <span class="badge ${product.stock_quantity <= product.min_stock ? 'bg-warning' : 'bg-success'}">
                             ${product.stock_quantity}
@@ -467,7 +516,11 @@
             }
         } catch (error) {
             console.error('Error loading low stock report:', error);
-            pdvSystem.showAlert('danger', 'Erro ao carregar relatório de estoque baixo');
+            if (window.pdvSystem) {
+                pdvSystem.showAlert('danger', 'Erro ao carregar relatório de estoque baixo');
+            } else {
+                alert('Erro ao carregar relatório de estoque baixo');
+            }
         }
     }
 
