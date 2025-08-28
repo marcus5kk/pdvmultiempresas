@@ -299,11 +299,12 @@
         if (window.pdvSystem) {
             return pdvSystem.formatDate(dateString);
         }
-        return new Intl.DateTimeFormat('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).format(new Date(dateString));
+        // Evitar problemas de fuso horário - assumir que a data já vem correta
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateString;
     }
     
     function showAlert(type, message) {
