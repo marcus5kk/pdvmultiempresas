@@ -49,7 +49,7 @@ define('BASE_PATH', getBasePath());
 
 // Configurações do banco de dados
 // Para PostgreSQL (padrão do Replit)
-define('DB_TYPE', $_ENV['DB_TYPE'] ?? 'postgresql');
+define('DB_TYPE', $_ENV['DB_TYPE'] ?? 'mysql');
 
 // Para MySQL/MySQLi (quando usar em hospedagem própria)
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');

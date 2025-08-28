@@ -112,8 +112,8 @@ class MySQLiWrapper {
         // Converter CURRENT_DATE para MySQL
         $sql = str_replace('CURRENT_DATE', 'CURDATE()', $sql);
         
-        // Converter DATE_TRUNC para MySQL
-        $sql = preg_replace("/DATE_TRUNC\\('month', ([^)]+)\\)/", "DATE_FORMAT($1, '%Y-%m-01')", $sql);
+        // Converter DATE_TRUNC para MySQL - remover pois causa erro de sintaxe
+        // DATE_TRUNC não tem equivalente direto no MySQL, será tratado caso a caso
         
         return $sql;
     }
