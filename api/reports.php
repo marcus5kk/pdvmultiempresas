@@ -80,14 +80,14 @@ try {
             
             $stmt = $db->prepare("
                 SELECT 
-                    DATE(s.created_at) as sale_date,
+                    DATE(CONVERT_TZ(s.created_at, '+00:00', '-03:00')) as sale_date,
                     COUNT(s.id) as sales_count,
                     SUM(s.total_amount) as total_amount,
                     SUM(s.discount) as total_discount,
                     SUM(s.tax) as total_tax
                 FROM sales s 
-                WHERE DATE(s.created_at) BETWEEN ? AND ?
-                GROUP BY DATE(s.created_at)
+                WHERE DATE(CONVERT_TZ(s.created_at, '+00:00', '-03:00')) BETWEEN ? AND ?
+                GROUP BY DATE(CONVERT_TZ(s.created_at, '+00:00', '-03:00'))
                 ORDER BY sale_date DESC
             ");
             $stmt->execute([$start_date, $end_date]);
@@ -101,7 +101,7 @@ try {
                     COALESCE(SUM(s.discount), 0) as total_discount,
                     COALESCE(SUM(s.tax), 0) as total_tax
                 FROM sales s 
-                WHERE DATE(s.created_at) BETWEEN ? AND ?
+                WHERE DATE(CONVERT_TZ(s.created_at, '+00:00', '-03:00')) BETWEEN ? AND ?
             ");
             $stmt->execute([$start_date, $end_date]);
             $totals = $stmt->fetch();
