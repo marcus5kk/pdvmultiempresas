@@ -61,6 +61,10 @@ try {
     $database = new Database();
     $db = $database->getConnection();
     
+    // Get user company_id for filtering
+    $user_company_id = $_SESSION['company_id'] ?? null;
+    $user_role = $_SESSION['role'] ?? '';
+    
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? $_POST['action'] ?? '';
     
@@ -68,8 +72,13 @@ try {
         case 'GET':
             if ($action === 'recent') {
                 $limit = intval($_GET['limit'] ?? 10);
-                $stmt = $db->prepare("SELECT s.*, u.full_name as user_name FROM sales s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT ?");
-                $stmt->execute([$limit]);
+                if ($user_company_id && $user_role !== 'admin' && $user_role !== 'system_admin') {
+                    $stmt = $db->prepare("SELECT s.*, u.full_name as user_name FROM sales s JOIN users u ON s.user_id = u.id WHERE u.company_id = ? ORDER BY s.created_at DESC LIMIT ?");
+                    $stmt->execute([$user_company_id, $limit]);
+                } else {
+                    $stmt = $db->prepare("SELECT s.*, u.full_name as user_name FROM sales s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT ?");
+                    $stmt->execute([$limit]);
+                }
                 $sales = $stmt->fetchAll();
                 
                 foreach ($sales as &$sale) {

@@ -62,6 +62,10 @@ try {
     $database = new Database();
     $db = $database->getConnection();
     
+    // Get user company_id for filtering
+    $user_company_id = $_SESSION['company_id'] ?? null;
+    $user_role = $_SESSION['role'] ?? '';
+    
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? $_POST['action'] ?? '';
     

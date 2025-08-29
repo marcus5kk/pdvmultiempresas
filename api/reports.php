@@ -42,26 +42,42 @@ try {
     $database = new Database();
     $db = $database->getConnection();
     
+    // Get user company_id for filtering
+    $user_company_id = $_SESSION['company_id'] ?? null;
+    $user_role = $_SESSION['role'] ?? '';
+    
     $action = $_GET['action'] ?? '';
     
     switch ($action) {
         case 'dashboard':
-            // Sales today
-            $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE DATE(created_at) = CURRENT_DATE");
-            $stmt->execute();
-            $today_sales = $stmt->fetch();
+            if ($user_company_id && $user_role !== 'admin' && $user_role !== 'system_admin') {
+                // Sales today - filtered by company
+                $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(s.total_amount), 0) as total FROM sales s JOIN users u ON s.user_id = u.id WHERE u.company_id = ? AND DATE(s.created_at) = CURRENT_DATE");
+                $stmt->execute([$user_company_id]);
+                $today_sales = $stmt->fetch();
+                
+                // Sales this month - filtered by company
+                $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(s.total_amount), 0) as total FROM sales s JOIN users u ON s.user_id = u.id WHERE u.company_id = ? AND YEAR(s.created_at) = YEAR(CURRENT_DATE) AND MONTH(s.created_at) = MONTH(CURRENT_DATE)");
+                $stmt->execute([$user_company_id]);
+                $month_sales = $stmt->fetch();
+            } else {
+                // Sales today - all companies
+                $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE DATE(created_at) = CURRENT_DATE");
+                $stmt->execute();
+                $today_sales = $stmt->fetch();
+                
+                // Sales this month - all companies
+                $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE YEAR(created_at) = YEAR(CURRENT_DATE) AND MONTH(created_at) = MONTH(CURRENT_DATE)");
+                $stmt->execute();
+                $month_sales = $stmt->fetch();
+            }
             
-            // Sales this month
-            $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE YEAR(created_at) = YEAR(CURRENT_DATE) AND MONTH(created_at) = MONTH(CURRENT_DATE)");
-            $stmt->execute();
-            $month_sales = $stmt->fetch();
-            
-            // Low stock products
+            // Low stock products (shared for all)
             $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE stock_quantity <= min_stock AND active = true");
             $stmt->execute();
             $low_stock = $stmt->fetch();
             
-            // Total products
+            // Total products (shared for all)
             $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE active = true");
             $stmt->execute();
             $total_products = $stmt->fetch();
