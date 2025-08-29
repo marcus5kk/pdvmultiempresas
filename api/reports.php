@@ -60,6 +60,16 @@ try {
                 $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(s.total_amount), 0) as total FROM sales s JOIN users u ON s.user_id = u.id WHERE u.company_id = ? AND YEAR(s.created_at) = YEAR(CURRENT_DATE) AND MONTH(s.created_at) = MONTH(CURRENT_DATE)");
                 $stmt->execute([$user_company_id]);
                 $month_sales = $stmt->fetch();
+                
+                // Low stock products - filtered by company
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE company_id = ? AND stock_quantity <= min_stock AND active = true");
+                $stmt->execute([$user_company_id]);
+                $low_stock = $stmt->fetch();
+                
+                // Total products - filtered by company
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE company_id = ? AND active = true");
+                $stmt->execute([$user_company_id]);
+                $total_products = $stmt->fetch();
             } else {
                 // Sales today - all companies
                 $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE DATE(created_at) = CURRENT_DATE");
@@ -70,17 +80,17 @@ try {
                 $stmt = $db->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE YEAR(created_at) = YEAR(CURRENT_DATE) AND MONTH(created_at) = MONTH(CURRENT_DATE)");
                 $stmt->execute();
                 $month_sales = $stmt->fetch();
+                
+                // Low stock products - all companies
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE stock_quantity <= min_stock AND active = true");
+                $stmt->execute();
+                $low_stock = $stmt->fetch();
+                
+                // Total products - all companies
+                $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE active = true");
+                $stmt->execute();
+                $total_products = $stmt->fetch();
             }
-            
-            // Low stock products (shared for all)
-            $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE stock_quantity <= min_stock AND active = true");
-            $stmt->execute();
-            $low_stock = $stmt->fetch();
-            
-            // Total products (shared for all)
-            $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE active = true");
-            $stmt->execute();
-            $total_products = $stmt->fetch();
             
             sendResponse(true, 'Dashboard data', [
                 'today_sales' => $today_sales,

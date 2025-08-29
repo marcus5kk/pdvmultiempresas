@@ -41,6 +41,13 @@ $user_role = $_SESSION['role'] ?? 'operator';
                         Empresas
                     </a>
                 </li>
+                <?php elseif ($user_role === 'company_operator'): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="pdv.php">
+                        <i class="fas fa-cash-register me-1"></i>
+                        PDV
+                    </a>
+                </li>
                 <?php else: ?>
                 <li class="nav-item">
                     <a class="nav-link" href="dashboard.php">

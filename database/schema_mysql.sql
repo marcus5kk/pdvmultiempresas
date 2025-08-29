@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS categories (
 -- Tabela de produtos
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    barcode VARCHAR(50) UNIQUE,
+    company_id INT NOT NULL,
+    barcode VARCHAR(50),
     name VARCHAR(200) NOT NULL,
     description TEXT,
     category_id INT,
@@ -60,7 +61,9 @@ CREATE TABLE IF NOT EXISTS products (
     active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (company_id) REFERENCES companies(id),
+    UNIQUE KEY unique_barcode_company (barcode, company_id)
 );
 
 -- Tabela de vendas
@@ -121,14 +124,14 @@ INSERT IGNORE INTO categories (name, description) VALUES
 ('Limpeza', 'Produtos de limpeza e higiene'),
 ('Eletrônicos', 'Produtos eletrônicos e acessórios');
 
--- Inserir alguns produtos de exemplo
-INSERT IGNORE INTO products (name, barcode, description, category_id, price, cost_price, stock_quantity, min_stock, unit) VALUES
-('Coca-Cola 350ml', '7891991010252', 'Refrigerante Coca-Cola lata 350ml', 1, 4.50, 3.00, 100, 10, 'un'),
-('Água Mineral 500ml', '7896098100014', 'Água mineral natural 500ml', 1, 2.00, 1.20, 150, 20, 'un'),
-('Pão de Açúcar', '7891234567890', 'Pão de açúcar tradicional', 2, 8.50, 6.00, 50, 5, 'un'),
-('Detergente Ypê', '7896036094044', 'Detergente líquido neutro 500ml', 3, 3.80, 2.50, 80, 10, 'un'),
-('Sabonete Dove', '7891150047354', 'Sabonete hidratante Dove 90g', 3, 4.90, 3.20, 60, 8, 'un'),
-('Fone de Ouvido', '1234567890123', 'Fone de ouvido com fio P2', 4, 25.00, 15.00, 30, 5, 'un');
+-- Inserir alguns produtos de exemplo para a empresa principal
+INSERT IGNORE INTO products (company_id, name, barcode, description, category_id, price, cost_price, stock_quantity, min_stock, unit) VALUES
+(1, 'Coca-Cola 350ml', '7891991010252', 'Refrigerante Coca-Cola lata 350ml', 1, 4.50, 3.00, 100, 10, 'un'),
+(1, 'Água Mineral 500ml', '7896098100014', 'Água mineral natural 500ml', 1, 2.00, 1.20, 150, 20, 'un'),
+(1, 'Pão de Açúcar', '7891234567890', 'Pão de açúcar tradicional', 2, 8.50, 6.00, 50, 5, 'un'),
+(1, 'Detergente Ypê', '7896036094044', 'Detergente líquido neutro 500ml', 3, 3.80, 2.50, 80, 10, 'un'),
+(1, 'Sabonete Dove', '7891150047354', 'Sabonete hidratante Dove 90g', 3, 4.90, 3.20, 60, 8, 'un'),
+(1, 'Fone de Ouvido', '1234567890123', 'Fone de ouvido com fio P2', 4, 25.00, 15.00, 30, 5, 'un');
 
 -- Índices para melhor performance
 CREATE INDEX idx_products_barcode ON products(barcode);

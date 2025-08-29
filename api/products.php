@@ -86,12 +86,23 @@ try {
                 
                 try {
                     if (!empty($barcode)) {
-                        $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.barcode = ? AND p.active = true");
-                        $stmt->execute([$barcode]);
+                        if ($user_company_id && $user_role !== 'admin' && $user_role !== 'system_admin') {
+                            $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.barcode = ? AND p.company_id = ? AND p.active = true");
+                            $stmt->execute([$barcode, $user_company_id]);
+                        } else {
+                            $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.barcode = ? AND p.active = true");
+                            $stmt->execute([$barcode]);
+                        }
                     } else {
-                        $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE (LOWER(p.name) LIKE LOWER(?) OR LOWER(p.barcode) LIKE LOWER(?)) AND p.active = true ORDER BY p.name LIMIT 20");
-                        $searchTerm = "%$term%";
-                        $stmt->execute([$searchTerm, $searchTerm]);
+                        if ($user_company_id && $user_role !== 'admin' && $user_role !== 'system_admin') {
+                            $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE (LOWER(p.name) LIKE LOWER(?) OR LOWER(p.barcode) LIKE LOWER(?)) AND p.company_id = ? AND p.active = true ORDER BY p.name LIMIT 20");
+                            $searchTerm = "%$term%";
+                            $stmt->execute([$searchTerm, $searchTerm, $user_company_id]);
+                        } else {
+                            $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE (LOWER(p.name) LIKE LOWER(?) OR LOWER(p.barcode) LIKE LOWER(?)) AND p.active = true ORDER BY p.name LIMIT 20");
+                            $searchTerm = "%$term%";
+                            $stmt->execute([$searchTerm, $searchTerm]);
+                        }
                     }
                     
                     $products = $stmt->fetchAll();
@@ -106,13 +117,23 @@ try {
                     $limit = intval($_GET['limit'] ?? 50);
                     $offset = ($page - 1) * $limit;
                     
-                    $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = true ORDER BY p.name LIMIT ? OFFSET ?");
-                    $stmt->execute([$limit, $offset]);
-                    $products = $stmt->fetchAll();
-                    
-                    $countStmt = $db->prepare("SELECT COUNT(*) as total FROM products WHERE active = true");
-                    $countStmt->execute();
-                    $total = $countStmt->fetch()['total'];
+                    if ($user_company_id && $user_role !== 'admin' && $user_role !== 'system_admin') {
+                        $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.company_id = ? AND p.active = true ORDER BY p.name LIMIT ? OFFSET ?");
+                        $stmt->execute([$user_company_id, $limit, $offset]);
+                        $products = $stmt->fetchAll();
+                        
+                        $countStmt = $db->prepare("SELECT COUNT(*) as total FROM products WHERE company_id = ? AND active = true");
+                        $countStmt->execute([$user_company_id]);
+                        $total = $countStmt->fetch()['total'];
+                    } else {
+                        $stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = true ORDER BY p.name LIMIT ? OFFSET ?");
+                        $stmt->execute([$limit, $offset]);
+                        $products = $stmt->fetchAll();
+                        
+                        $countStmt = $db->prepare("SELECT COUNT(*) as total FROM products WHERE active = true");
+                        $countStmt->execute();
+                        $total = $countStmt->fetch()['total'];
+                    }
                     
                     sendResponse(true, 'Produtos encontrados', [
                         'products' => $products,
@@ -152,18 +173,23 @@ try {
                     sendResponse(false, 'Nome e preço são obrigatórios');
                 }
                 
-                // Check if barcode exists (if provided)
-                if (!empty($barcode)) {
-                    $stmt = $db->prepare("SELECT id FROM products WHERE barcode = ? AND active = true");
-                    $stmt->execute([$barcode]);
+                // Check if barcode exists in same company (if provided)
+                if (!empty($barcode) && $user_company_id) {
+                    $stmt = $db->prepare("SELECT id FROM products WHERE barcode = ? AND company_id = ? AND active = true");
+                    $stmt->execute([$barcode, $user_company_id]);
                     if ($stmt->fetch()) {
-                        sendResponse(false, 'Código de barras já existe');
+                        sendResponse(false, 'Código de barras já existe nesta empresa');
                     }
                 }
                 
-                // Insert product - sem user_id pois não existe na tabela
-                $stmt = $db->prepare("INSERT INTO products (name, barcode, category_id, price, cost_price, stock_quantity, min_stock, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$name, $barcode, $category_id ?: null, $price, $cost_price, $stock_quantity, $min_stock, $description]);
+                // Company_id validation
+                if (!$user_company_id) {
+                    sendResponse(false, 'Usuário deve pertencer a uma empresa para criar produtos');
+                }
+                
+                // Insert product with company_id
+                $stmt = $db->prepare("INSERT INTO products (company_id, name, barcode, category_id, price, cost_price, stock_quantity, min_stock, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$user_company_id, $name, $barcode, $category_id ?: null, $price, $cost_price, $stock_quantity, $min_stock, $description]);
                 
                 // Compatível com MySQL e PostgreSQL
                 $product_id = $db->lastInsertId();

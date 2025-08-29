@@ -21,6 +21,8 @@ if (!isset($_SESSION['user_id'])) {
 // Redirect based on user role
 if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'system_admin')) {
     header('Location: ' . $base_path . 'pages/users.php');
+} elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'company_operator') {
+    header('Location: ' . $base_path . 'pages/pdv.php');
 } else {
     header('Location: ' . $base_path . 'pages/dashboard.php');
 }

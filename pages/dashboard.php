@@ -1,9 +1,13 @@
 <?php 
 require_once '../includes/auth_check.php'; 
 
-// Verificar se o usuário admin está tentando acessar o Dashboard
+// Verificar se o usuário admin ou company_operator está tentando acessar o Dashboard
 if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'system_admin') {
     header('Location: users.php?error=access_denied');
+    exit();
+}
+if ($_SESSION['role'] === 'company_operator') {
+    header('Location: pdv.php?error=access_denied');
     exit();
 }
 ?>
