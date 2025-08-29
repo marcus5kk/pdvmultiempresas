@@ -76,7 +76,12 @@ class PDVSystem {
                 this.user = data.data.user;
                 this.showAlert('success', 'Login realizado com sucesso!');
                 setTimeout(() => {
-                    window.location.href = pageUrl('dashboard.php');
+                    // Redirecionar admin para users.php em vez de dashboard.php
+                    if (this.user.role === 'admin') {
+                        window.location.href = pageUrl('users.php');
+                    } else {
+                        window.location.href = pageUrl('dashboard.php');
+                    }
                 }, 1000);
             } else {
                 this.showAlert('danger', data.message);

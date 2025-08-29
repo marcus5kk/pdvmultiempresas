@@ -10,10 +10,17 @@ $user_role = $_SESSION['role'] ?? 'operator';
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
+        <?php if ($user_role === 'admin'): ?>
+        <span class="navbar-brand">
+            <i class="fas fa-cash-register me-2"></i>
+            Sistema PDV
+        </span>
+        <?php else: ?>
         <a class="navbar-brand" href="dashboard.php">
             <i class="fas fa-cash-register me-2"></i>
             Sistema PDV
         </a>
+        <?php endif; ?>
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -21,6 +28,20 @@ $user_role = $_SESSION['role'] ?? 'operator';
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
+                <?php if ($user_role === 'admin'): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="users.php">
+                        <i class="fas fa-users me-1"></i>
+                        Usuários
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="companies.php">
+                        <i class="fas fa-building me-1"></i>
+                        Empresas
+                    </a>
+                </li>
+                <?php else: ?>
                 <li class="nav-item">
                     <a class="nav-link" href="dashboard.php">
                         <i class="fas fa-tachometer-alt me-1"></i>
@@ -45,6 +66,7 @@ $user_role = $_SESSION['role'] ?? 'operator';
                         Relatórios
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
             
             <ul class="navbar-nav">

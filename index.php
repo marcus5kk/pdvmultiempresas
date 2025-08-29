@@ -18,7 +18,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Redirect to dashboard if authenticated
-header('Location: ' . $base_path . 'pages/dashboard.php');
+// Redirect based on user role
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    header('Location: ' . $base_path . 'pages/users.php');
+} else {
+    header('Location: ' . $base_path . 'pages/dashboard.php');
+}
 exit();
 ?>

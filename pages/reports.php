@@ -1,4 +1,12 @@
-<?php require_once '../includes/auth_check.php'; ?>
+<?php 
+require_once '../includes/auth_check.php'; 
+
+// Verificar se o usuário admin está tentando acessar Relatórios
+if ($_SESSION['role'] === 'admin') {
+    header('Location: users.php?error=access_denied');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
