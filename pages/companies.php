@@ -2,7 +2,7 @@
 require_once '../includes/auth_check.php';
 
 // Verificar se é admin do sistema
-if (!hasRole('admin')) {
+if (!hasRole('system_admin') && !hasRole('admin')) {
     header('Location: users.php');
     exit();
 }

@@ -77,7 +77,7 @@ class PDVSystem {
                 this.showAlert('success', 'Login realizado com sucesso!');
                 setTimeout(() => {
                     // Redirecionar admin para users.php em vez de dashboard.php
-                    if (this.user.role === 'admin') {
+                    if (this.user.role === 'admin' || this.user.role === 'system_admin') {
                         window.location.href = pageUrl('users.php');
                     } else {
                         window.location.href = pageUrl('dashboard.php');
@@ -127,7 +127,7 @@ class PDVSystem {
         // Show/hide menu items based on user role
         const adminItems = document.querySelectorAll('.admin-only');
         adminItems.forEach(item => {
-            item.style.display = this.user.role === 'admin' ? 'block' : 'none';
+            item.style.display = (this.user.role === 'admin' || this.user.role === 'system_admin') ? 'block' : 'none';
         });
     }
 

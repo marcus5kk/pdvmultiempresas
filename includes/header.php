@@ -10,7 +10,7 @@ $user_role = $_SESSION['role'] ?? 'operator';
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-        <?php if ($user_role === 'admin'): ?>
+        <?php if ($user_role === 'admin' || $user_role === 'system_admin'): ?>
         <span class="navbar-brand">
             <i class="fas fa-cash-register me-2"></i>
             Sistema PDV
@@ -28,7 +28,7 @@ $user_role = $_SESSION['role'] ?? 'operator';
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <?php if ($user_role === 'admin'): ?>
+                <?php if ($user_role === 'admin' || $user_role === 'system_admin'): ?>
                 <li class="nav-item">
                     <a class="nav-link" href="users.php">
                         <i class="fas fa-users me-1"></i>
@@ -84,7 +84,7 @@ $user_role = $_SESSION['role'] ?? 'operator';
                             </span>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <?php if ($user_role === 'admin'): ?>
+                        <?php if ($user_role === 'admin' || $user_role === 'system_admin'): ?>
                         <li>
                             <a class="dropdown-item admin-only" href="users.php">
                                 <i class="fas fa-users me-2"></i>

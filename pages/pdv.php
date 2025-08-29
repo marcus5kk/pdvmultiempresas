@@ -2,7 +2,7 @@
 require_once '../includes/auth_check.php'; 
 
 // Verificar se o usuário admin está tentando acessar o PDV
-if ($_SESSION['role'] === 'admin') {
+if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'system_admin') {
     header('Location: users.php?error=access_denied');
     exit();
 }
